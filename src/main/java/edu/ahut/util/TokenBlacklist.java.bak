@@ -1,0 +1,52 @@
+package edu.ahut.util;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
+public class TokenBlacklist {
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+    
+    // 使用ConcurrentHashMap存储无效的令牌
+    private final Map<String, Date> invalidatedTokens = new ConcurrentHashMap<>();
+    
+    /**
+     * 将令牌添加到黑名单
+     * @param token JWT令牌
+     */
+    public void addToBlacklist(String token) {
+        try {
+            // 获取令牌的过期时间
+            Date expiryDate = jwtUtil.getExpirationDateFromToken(token);
+            invalidatedTokens.put(token, expiryDate);
+        } catch (Exception e) {
+            // 如果令牌已经无效或格式错误，忽略异常
+        }
+    }
+    
+    /**
+     * 检查令牌是否在黑名单中
+     * @param token JWT令牌
+     * @return 如果令牌在黑名单中返回true
+     */
+    public boolean isBlacklisted(String token) {
+        return invalidatedTokens.containsKey(token);
+    }
+    
+    /**
+     * 定时清理过期的黑名单令牌
+     * 每小时执行一次
+     */
+    @Scheduled(fixedRate = 3600000)
+    public void cleanupExpiredTokens() {
+        Date now = new Date();
+        invalidatedTokens.entrySet().removeIf(entry -> entry.getValue().before(now));
+    }
+} 
