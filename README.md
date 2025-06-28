@@ -151,9 +151,6 @@ mvn spring-boot:run
 | created_at | BIGINT | 充值时间 |
 | operator_id | BIGINT | 操作员ID |
 
-## 开源协议
-
-本项目采用 [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) 开源协议。
 
 ### 重要说明
 - 本项目为课程设计作品，仅供学习和参考。
